@@ -252,22 +252,29 @@ pub fn parse_json_for_slots(json:serde_json::Value, age:i64, minnum:i64) -> Resu
 	return Ok(result);
 }
 
-const TEXTLOCALSERVER: &str = "https://api.textlocal.in/send/";
-
-pub fn send_textlocal_sms(api_key:String, phone_number:String, center:String, datestring: String, slots: i64) -> RequestOutput {
-	let message = format!("{:?} vaccine slots available at {:?} on {:?}",slots,center,datestring);
-	let resp_maybe = ureq::post(&TEXTLOCALSERVER)
-    .send_json(ureq::json!(
-    	{"apikey":api_key,
-    	"numbers":phone_number,
-    	"message":message,
-    	"sender":"COWIN-RS"
-        }
-    	));
+pub fn send_whatsapp_message(api_key:String, phone_number:String, center:String, datestring: String, slots: i64) -> RequestOutput {
+	let message = format!("{} vaccine slots available at {} on {}",slots,center,datestring).replace(" ","%20");
+	let callmeboturl = format!("https://api.callmebot.com/whatsapp.php?source=web&phone={}&apikey={}&text={}",phone_number,api_key,message);
+	let resp_maybe = ureq::get(&callmeboturl).call();
 	let returnval = match resp_maybe {
 		Ok(response) => 
-		match response.into_json() {
-			Ok(json_response) => RequestOutput::Works(json_response),
+		match response.into_string() {
+			Ok(string_response) => RequestOutput::Works(ureq::json!({"request_output":string_response})),
+			Err(e) => RequestOutput::ReadError(e.to_string()),
+		},
+		Err(e) => RequestOutput::NetworkError(e.to_string()) ,
+	};
+	return returnval;
+    }
+
+pub fn send_whatsapp_message_borrowed(api_key:String, phone_number:String, center:&String, datestring: &String, slots: i64) -> RequestOutput {
+	let message = format!("{} vaccine slots available at {} on {}",slots,&center,&datestring).replace(" ","%20");
+	let callmeboturl = format!("https://api.callmebot.com/whatsapp.php?source=web&phone={}&apikey={}&text={}",phone_number,api_key,message);
+	let resp_maybe = ureq::get(&callmeboturl).call();
+	let returnval = match resp_maybe {
+		Ok(response) => 
+		match response.into_string() {
+			Ok(string_response) => RequestOutput::Works(ureq::json!({"request_output":string_response})),
 			Err(e) => RequestOutput::ReadError(e.to_string()),
 		},
 		Err(e) => RequestOutput::NetworkError(e.to_string()) ,
