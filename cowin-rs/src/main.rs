@@ -20,7 +20,7 @@ if pincode_input_present {
 						if let Some(phone_number) = phone_maybe {
 								for opslot in &opvec {
 								match api_stuff::send_whatsapp_message_borrowed(api_key.to_string(), phone_number.to_string(), &opslot.0, &opslot.1, opslot.3 ){
-									api_stuff::RequestOutput::Works(_j) => continue,
+									api_stuff::RequestOutput::Works(j) => println!("Response from Callmebot :: {:?}",j ),
 									api_stuff::RequestOutput::ReadError(s) => return Err(format!("Error in sending to whatsapp {:?}",s)),
 									api_stuff::RequestOutput::NetworkError(s) => return Err(format!("Error in sending to whatsapp {:?}",s)),
 								}
@@ -62,7 +62,7 @@ if let Some(state) = state_maybe {
 						if let Some(phone_number) = phone_maybe {
 								for opslot in &opvec {
 								match api_stuff::send_whatsapp_message_borrowed(api_key.to_string(), phone_number.to_string(), &opslot.0, &opslot.1, opslot.3 ){
-									api_stuff::RequestOutput::Works(_j) => continue,
+									api_stuff::RequestOutput::Works(j) => println!("Response from Callmebot :: {:?}",j ),
 									api_stuff::RequestOutput::ReadError(s) => return Err(format!("Error in sending to whatsapp {:?}",s)),
 									api_stuff::RequestOutput::NetworkError(s) => return Err(format!("Error in sending to whatsapp {:?}",s)),
 								}
